@@ -1,21 +1,32 @@
 import { Link } from "react-router-dom";
 
-const ProductCard = ({ product }) => {
-  return (
-    <Link to={`/product/${product._id}`} className="product-card">
-      <img
-        src={product.imageUrl || "https://placehold.co/300x300?text=No+Image"}
-        alt={product.name}
-      />
-      <h4>{product.name}</h4>
-      <div className="rating">
-        {"★".repeat(Math.round(product.rating || 0))}
-        {"☆".repeat(5 - Math.round(product.rating || 0))} ({product.numReviews || 0})
-      </div>
-      <div className="price">₹{product.price}</div>
-      {product.stock === 0 && <div className="error-text">Out of stock</div>}
-    </Link>
-  );
-};
+export const getImage = (p) => p.imageUrl || p.image || p.images?.[0] || null;
 
-export default ProductCard;
+export default function ProductCard({ product, onAdd }) {
+  const id = product._id || product.id;
+  const img = getImage(product);
+  const outOfStock = product.stock !== undefined && Number(product.stock) <= 0;
+
+  return (
+    <article className="card">
+      <Link to={`/product/${id}`} className={`card-img ${img ? "" : "noimg"}`}>
+        {img ? (
+          <img src={img} alt={product.name} loading="lazy" />
+        ) : (
+          <span>{product.name?.charAt(0)}</span>
+        )}
+      </Link>
+      <div className="card-body">
+        <span className="card-cat">{product.category}</span>
+        <h3 className="card-name"><Link to={`/product/${id}`}>{product.name}</Link></h3>
+        {product.rating > 0 && <span className="rating">★ {Number(product.rating).toFixed(1)}</span>}
+        <div className="card-foot">
+          <span className="price">₹{Number(product.price).toLocaleString("en-IN")}</span>
+          <button className="btn btn-primary" onClick={() => onAdd?.(product)} disabled={outOfStock}>
+            {outOfStock ? "Out of stock" : "Add to cart"}
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}

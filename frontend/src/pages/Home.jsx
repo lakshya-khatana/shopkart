@@ -1,83 +1,141 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
 
-const CATEGORIES = ["Electronics", "Fashion", "Home & Kitchen", "Books", "Beauty", "Sports"];
+const PRICES = [
+  { label: "Any price", test: () => true },
+  { label: "Under ₹500", test: (p) => p < 500 },
+  { label: "₹500 – ₹2,000", test: (p) => p >= 500 && p <= 2000 },
+  { label: "Above ₹2,000", test: (p) => p > 2000 },
+];
 
-const Home = () => {
-  const [searchParams] = useSearchParams();
+export default function Home() {
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const search = (params.get("search") || "").toLowerCase();
+
   const [products, setProducts] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
-  const [category, setCategory] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("loading"); // loading | ready | error
+  const [category, setCategory] = useState("All");
+  const [priceIdx, setPriceIdx] = useState(0);
+  const [toast, setToast] = useState(null);
+  const timer = useRef();
 
-  const search = searchParams.get("search") || "";
+  const showToast = (msg, error = false) => {
+    setToast({ msg, error });
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setToast(null), 2500);
+  };
+  useEffect(() => () => clearTimeout(timer.current), []);
 
-  useEffect(() => {
-    fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, maxPrice, page]);
+  const load = useCallback(() => {
+    setStatus("loading");
+    api
+      .get("/products")
+      .then(({ data }) => {
+        setProducts(Array.isArray(data) ? data : data.products || []);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
+  }, []);
+  useEffect(load, [load]);
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  const categories = useMemo(
+    () => ["All", ...new Set(products.map((p) => p.category).filter(Boolean))],
+    [products]
+  );
+
+  const visible = products.filter(
+    (p) =>
+      (category === "All" || p.category === category) &&
+      PRICES[priceIdx].test(Number(p.price)) &&
+      (!search || p.name?.toLowerCase().includes(search))
+  );
+
+  const handleAdd = async (p) => {
+    if (!user) return navigate("/login");
+    if (user.role === "seller") return showToast("Seller accounts can't shop. Log in as a customer.", true);
     try {
-      const { data } = await api.get("/products", {
-        params: { search, category, maxPrice, page, limit: 12 },
-      });
-      setProducts(data.products);
-      setTotalPages(data.totalPages);
-    } finally {
-      setLoading(false);
+      await addToCart(p._id || p.id, 1);
+      showToast("Added to cart");
+    } catch (e) {
+      showToast(e.response?.data?.message || "Couldn't add to cart. Try again.", true);
     }
   };
 
   return (
-    <div className="container">
-      <h2>{search ? `Search results for "${search}"` : "All Products"}</h2>
-
-      <div className="filters">
-        <select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }}>
-          <option value="">All Categories</option>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-        <select value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}>
-          <option value="">Any Price</option>
-          <option value="500">Under ₹500</option>
-          <option value="1000">Under ₹1,000</option>
-          <option value="5000">Under ₹5,000</option>
-          <option value="20000">Under ₹20,000</option>
-        </select>
-      </div>
-
-      {loading && <p>Loading products...</p>}
-      {!loading && products.length === 0 && <p>No products found. Try a different search or filter.</p>}
-
-      <div className="grid">
-        {products.map((p) => (
-          <ProductCard key={p._id} product={p} />
-        ))}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="pagination">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              className={p === page ? "" : "secondary"}
-              onClick={() => setPage(p)}
-            >
-              {p}
-            </button>
-          ))}
+    <>
+      <section className="hero">
+        <div className="hero-inner">
+          <h1>Everything you need, delivered to your door</h1>
+          <p>Browse the catalogue, filter by category and price, and check out in a few taps.</p>
         </div>
-      )}
-    </div>
-  );
-};
+      </section>
 
-export default Home;
+      <main className="container">
+        <div className="toolbar">
+          <div className="chips">
+            {categories.map((c) => (
+              <button key={c} className={`chip ${c === category ? "active" : ""}`} onClick={() => setCategory(c)}>
+                {c}
+              </button>
+            ))}
+          </div>
+          <select className="select" value={priceIdx} onChange={(e) => setPriceIdx(Number(e.target.value))} aria-label="Filter by price">
+            {PRICES.map((p, i) => (
+              <option key={p.label} value={i}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {status === "loading" && (
+          <div className="grid">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div className="sk-card" key={i}>
+                <div className="skeleton sk-img" />
+                <div className="skeleton sk-line" />
+                <div className="skeleton sk-line short" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="state">
+            <h3>Couldn't load products</h3>
+            <p>The server may be waking up. This can take up to a minute.</p>
+            <button className="btn btn-primary" onClick={load}>Try again</button>
+          </div>
+        )}
+
+        {status === "ready" && visible.length === 0 && (
+          <div className="state">
+            <h3>No products match your filters</h3>
+            <p>Try a different category, price range, or search term.</p>
+            <button className="btn btn-ghost" onClick={() => { setCategory("All"); setPriceIdx(0); }}>
+              Clear filters
+            </button>
+          </div>
+        )}
+
+        {status === "ready" && visible.length > 0 && (
+          <>
+            <p className="result-count">{visible.length} products</p>
+            <div className="grid">
+              {visible.map((p) => (
+                <ProductCard key={p._id || p.id} product={p} onAdd={handleAdd} />
+              ))}
+            </div>
+          </>
+        )}
+      </main>
+
+      {toast && <div className={`toast ${toast.error ? "toast-error" : ""}`} role="status">{toast.msg}</div>}
+    </>
+  );
+}

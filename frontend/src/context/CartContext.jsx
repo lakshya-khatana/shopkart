@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import api from "../api";
 import { useAuth } from "./AuthContext";
 
@@ -10,9 +10,18 @@ export const CartProvider = ({ children }) => {
 
   const refreshCart = useCallback(async () => {
     if (!user) return;
-    const { data } = await api.get("/cart");
-    setCart(data);
+    try {
+      const { data } = await api.get("/cart");
+      setCart(data);
+    } catch {
+      setCart({ items: [] });
+    }
   }, [user]);
+
+  useEffect(() => {
+    if (user) refreshCart();
+    else setCart({ items: [] });
+  }, [user, refreshCart]);
 
   const addToCart = async (productId, quantity = 1) => {
     const { data } = await api.post("/cart", { productId, quantity });
