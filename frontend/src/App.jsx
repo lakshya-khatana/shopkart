@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Footer from "./components/footer";
 import PrivateRoute from "./components/PrivateRoute";
 
 import Home from "./pages/Home";
@@ -61,3 +61,8 @@ function App() {
           <Footer />
         </BrowserRouter>
       </CartProvider>
+    </AuthProvider>
+  );
+}
+
+export default App;
