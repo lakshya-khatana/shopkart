@@ -15,12 +15,14 @@ const Cart = () => {
   const subtotal = items.reduce((sum, i) => sum + (i.product?.price || 0) * i.quantity, 0);
 
   return (
-    <div className="container">
-      <h2>Your Cart</h2>
+    <div className="container" style={{ maxWidth: 720, paddingBottom: 64 }}>
+      <h2 className="page-title">Your Cart</h2>
+
       {items.length === 0 && (
-        <div className="card">
-          <p>Your cart is empty.</p>
-          <Link to="/">Continue shopping →</Link>
+        <div className="state">
+          <h3>Your cart is empty</h3>
+          <p>Add something you like and it'll show up here.</p>
+          <Link to="/" className="btn btn-primary" style={{ display: "inline-flex" }}>Continue shopping</Link>
         </div>
       )}
 
@@ -35,12 +37,12 @@ const Cart = () => {
                 />
                 <div style={{ flex: 1 }}>
                   <b>{item.product.name}</b>
-                  <p className="price">₹{item.product.price}</p>
+                  <p className="price">₹{Number(item.product.price).toLocaleString("en-IN")}</p>
                 </div>
                 <div className="qty-control">
-                  <button className="secondary" onClick={() => updateQuantity(item.product._id, item.quantity - 1)}>-</button>
+                  <button onClick={() => updateQuantity(item.product._id, item.quantity - 1)}>−</button>
                   <span>{item.quantity}</span>
-                  <button className="secondary" onClick={() => updateQuantity(item.product._id, item.quantity + 1)}>+</button>
+                  <button onClick={() => updateQuantity(item.product._id, item.quantity + 1)}>+</button>
                 </div>
                 <button className="danger" onClick={() => removeFromCart(item.product._id)}>Remove</button>
               </div>
@@ -52,8 +54,8 @@ const Cart = () => {
               <span>Subtotal</span>
               <span>₹{subtotal.toFixed(2)}</span>
             </div>
-            <button style={{ width: "100%", marginTop: 10 }} onClick={() => navigate("/checkout")}>
-              Proceed to Checkout
+            <button style={{ width: "100%", marginTop: 14 }} onClick={() => navigate("/checkout")}>
+              Proceed to checkout
             </button>
           </div>
         </>

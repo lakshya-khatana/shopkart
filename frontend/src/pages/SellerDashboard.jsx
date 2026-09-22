@@ -55,9 +55,11 @@ const SellerDashboard = () => {
   const handleEdit = (p) => {
     setForm({ name: p.name, description: p.description, category: p.category, price: p.price, stock: p.stock, imageUrl: p.imageUrl });
     setEditingId(p._id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
     await api.delete(`/products/${id}`);
     fetchProducts();
   };
@@ -70,11 +72,12 @@ const SellerDashboard = () => {
   const totalSales = orders.reduce((sum, o) => sum + o.totalPrice, 0);
 
   return (
-    <div className="container">
-      <h2>Seller Dashboard</h2>
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        <button className={tab === "products" ? "" : "secondary"} onClick={() => setTab("products")}>Products</button>
-        <button className={tab === "orders" ? "" : "secondary"} onClick={() => setTab("orders")}>Orders</button>
+    <div className="container" style={{ paddingTop: 32, paddingBottom: 64 }}>
+      <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 20 }}>Seller Dashboard</h2>
+
+      <div className="dash-tabs">
+        <button className={tab === "products" ? "active" : ""} onClick={() => setTab("products")}>Products</button>
+        <button className={tab === "orders" ? "active" : ""} onClick={() => setTab("orders")}>Orders</button>
       </div>
 
       {tab === "products" && (
@@ -100,12 +103,14 @@ const SellerDashboard = () => {
 
           <div className="card">
             <h3>Your Products ({products.length})</h3>
+            {products.length === 0 && <p style={{ color: "var(--muted)" }}>No products yet. Add your first one above.</p>}
             {products.map((p) => (
-              <div key={p._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eee", padding: "10px 0" }}>
+              <div key={p._id} className="product-row">
                 <div>
-                  <b>{p.name}</b> — ₹{p.price} · Stock: {p.stock}
+                  <div className="name">{p.name}</div>
+                  <div className="meta">₹{Number(p.price).toLocaleString("en-IN")} · Stock: {p.stock}</div>
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div className="actions">
                   <button className="secondary" onClick={() => handleEdit(p)}>Edit</button>
                   <button className="danger" onClick={() => handleDelete(p._id)}>Delete</button>
                 </div>
@@ -118,20 +123,23 @@ const SellerDashboard = () => {
       {tab === "orders" && (
         <>
           <div className="card">
-            <h3>Total Sales: ₹{totalSales.toFixed(2)}</h3>
+            <h3>Total Sales: ₹{totalSales.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</h3>
           </div>
+          {orders.length === 0 && <p style={{ color: "var(--muted)" }}>No orders yet.</p>}
           {orders.map((o) => (
             <div className="card" key={o._id}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                 <b>Order #{o._id.slice(-6).toUpperCase()}</b>
                 <span className="status-pill">{o.status}</span>
               </div>
-              <p>Customer: {o.customer?.name} ({o.customer?.email})</p>
+              <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 10 }}>
+                Customer: {o.customer?.name} ({o.customer?.email})
+              </p>
               {o.items.map((item, i) => (
-                <div key={i} style={{ fontSize: 14 }}>{item.name} × {item.quantity}</div>
+                <div key={i} style={{ fontSize: 14, padding: "3px 0" }}>{item.name} × {item.quantity}</div>
               ))}
               <div className="summary-row total"><span>Total</span><span>₹{o.totalPrice}</span></div>
-              <select value={o.status} onChange={(e) => updateOrderStatus(o._id, e.target.value)}>
+              <select style={{ marginTop: 12 }} value={o.status} onChange={(e) => updateOrderStatus(o._id, e.target.value)}>
                 <option value="processing">Processing</option>
                 <option value="shipped">Shipped</option>
                 <option value="delivered">Delivered</option>

@@ -26,9 +26,9 @@ const Register = () => {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 420 }}>
+    <div className="auth-page">
       <div className="card">
-        <h1>🛒 ShopKart</h1>
+        <h1>ShopKart</h1>
         <p>Create your account</p>
         <form onSubmit={handleSubmit}>
           <input name="name" placeholder="Full name" onChange={handleChange} required />
@@ -39,13 +39,9 @@ const Register = () => {
             <option value="seller">I want to sell (Seller)</option>
           </select>
           {error && <p className="error-text">{error}</p>}
-          <button type="submit" disabled={loading} style={{ width: "100%" }}>
-            {loading ? "Creating..." : "Create account"}
-          </button>
+          <button type="submit" disabled={loading}>{loading ? "Creating..." : "Create account"}</button>
         </form>
-        <p className="link-text">
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+        <p className="link-text">Already have an account? <Link to="/login">Login</Link></p>
       </div>
     </div>
   );

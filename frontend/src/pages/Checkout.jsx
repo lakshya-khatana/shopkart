@@ -23,15 +23,9 @@ const Checkout = () => {
     setError("");
     setPlacing(true);
     try {
-      // 1. Create a (mock) order on the backend (server recalculates the total)
       const { data } = await api.post("/orders/create-payment", { shippingAddress: address });
-
-      // 2. Simulate a brief "processing" delay instead of a real gateway popup
       await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      // 3. Mark the order as paid (mock — always succeeds, no signature to check)
       await api.post("/orders/verify-payment", { orderId: data.orderId });
-
       await refreshCart();
       navigate("/orders");
     } catch (err) {
@@ -42,29 +36,28 @@ const Checkout = () => {
   };
 
   if (items.length === 0) {
-    return <div className="container"><p>Your cart is empty.</p></div>;
+    return (
+      <div className="container">
+        <div className="state">
+          <h3>Your cart is empty</h3>
+          <p>Add items to your cart before checking out.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container" style={{ maxWidth: 560 }}>
-      <h2>Checkout</h2>
-      <div
-        style={{
-          background: "#fff8e1",
-          border: "1px solid #ffe082",
-          borderRadius: 6,
-          padding: "10px 14px",
-          marginBottom: 16,
-          fontSize: 13,
-          color: "#7a5c00",
-        }}
-      >
-        ⚠️ <strong>Demo Mode:</strong> No real payment gateway is connected. Clicking
-        "Pay" simulates a successful payment — no card/UPI details are charged.
+    <div className="container" style={{ maxWidth: 560, paddingBottom: 64 }}>
+      <h2 className="page-title">Checkout</h2>
+
+      <div className="demo-banner">
+        <span>⚠️</span>
+        <span><strong>Demo mode:</strong> no real payment gateway is connected. Clicking "Pay" simulates a successful payment — no card or UPI details are charged.</span>
       </div>
+
       <form onSubmit={handlePayment}>
         <div className="card">
-          <h3>Shipping Address</h3>
+          <h3>Shipping address</h3>
           <input name="line1" placeholder="Address line" onChange={handleChange} required />
           <input name="city" placeholder="City" onChange={handleChange} required />
           <input name="state" placeholder="State" onChange={handleChange} required />
@@ -73,19 +66,17 @@ const Checkout = () => {
         </div>
 
         <div className="card">
-          <h3>Order Summary</h3>
+          <h3>Order summary</h3>
           <div className="summary-row"><span>Items</span><span>₹{itemsPrice.toFixed(2)}</span></div>
           <div className="summary-row"><span>Shipping</span><span>{shippingPrice === 0 ? "Free" : `₹${shippingPrice}`}</span></div>
           <div className="summary-row"><span>Tax (5%)</span><span>₹{taxPrice}</span></div>
           <div className="summary-row total"><span>Total</span><span>₹{totalPrice}</span></div>
 
           {error && <p className="error-text">{error}</p>}
-          <button type="submit" disabled={placing} style={{ width: "100%", marginTop: 10 }}>
+          <button type="submit" disabled={placing} style={{ width: "100%", marginTop: 14 }}>
             {placing ? "Processing..." : `Pay ₹${totalPrice}`}
           </button>
-          <p style={{ fontSize: 12, color: "#888", marginTop: 8 }}>
-            Demo mode — payment is simulated, no real gateway is charged.
-          </p>
+          <p className="helper-text">Demo mode — payment is simulated, no real gateway is charged.</p>
         </div>
       </form>
     </div>

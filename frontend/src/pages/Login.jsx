@@ -25,21 +25,17 @@ const Login = () => {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 420 }}>
+    <div className="auth-page">
       <div className="card">
-        <h1>🛒 ShopKart</h1>
+        <h1>ShopKart</h1>
         <p>Login to continue</p>
         <form onSubmit={handleSubmit}>
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           {error && <p className="error-text">{error}</p>}
-          <button type="submit" disabled={loading} style={{ width: "100%" }}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
+          <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
         </form>
-        <p className="link-text">
-          New here? <Link to="/register">Create an account</Link>
-        </p>
+        <p className="link-text">New here? <Link to="/register">Create an account</Link></p>
       </div>
     </div>
   );
