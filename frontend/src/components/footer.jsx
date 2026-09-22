@@ -2,26 +2,38 @@ import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
-    <footer className="footer">
-      <div className="container footer-inner">
+    <footer className="footer-dark">
+      <div className="footer-watermark" aria-hidden="true">SHOPKART</div>
+
+      <div className="container footer-dark-inner">
         <div>
-          <span className="logo">ShopKart</span>
-          <p>Everything you need, delivered to your door.</p>
+          <h2 className="footer-dark-brand">ShopKart</h2>
+          <p>Everything you need, delivered to your door — a full-stack shopping experience built with care.</p>
         </div>
+
         <div>
-          <h4>Company</h4>
-          <Link to="/about">About</Link>
-          <Link to="/careers">Careers</Link>
-          <Link to="/contact">Contact</Link>
+          <h3>Company</h3>
+          <ul>
+            <li><Link to="/about">About</Link></li>
+            <li><Link to="/careers">Careers</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
+          </ul>
         </div>
+
         <div>
-          <h4>Help</h4>
-          <Link to="/shipping">Shipping</Link>
-          <Link to="/returns">Returns</Link>
-          <Link to="/faqs">FAQs</Link>
+          <h3>Help</h3>
+          <ul>
+            <li><Link to="/shipping">Shipping</Link></li>
+            <li><Link to="/returns">Returns</Link></li>
+            <li><Link to="/faqs">FAQs</Link></li>
+          </ul>
         </div>
       </div>
-      <p className="footer-bottom">© {new Date().getFullYear()} ShopKart — Built by Lakshya Khatana</p>
+
+      <div className="footer-dark-bar">
+        <span>© {new Date().getFullYear()} ShopKart. All rights reserved.</span>
+        <span className="footer-status">Built by Lakshya Khatana</span>
+      </div>
     </footer>
   );
 }
