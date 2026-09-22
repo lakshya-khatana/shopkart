@@ -211,3 +211,17 @@ button.danger:hover { background: #fef2f2; }
 .suggest-list li:hover { background: var(--brand-soft); }
 .related { padding-bottom: 64px; }
 .related h2 { font-size: 20px; font-weight: 800; margin: 8px 0 20px; }
+.card { position: relative; }
+.wish-btn { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: rgba(255,255,255,.9); font-size: 18px; color: var(--muted); cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.1); z-index: 2; }
+.wish-btn.active { color: var(--brand); }
+.wish-btn:hover { background: #fff; }
+.reviews-section { padding: 40px 24px; max-width: 720px; }
+.reviews-section h2 { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+.reviews-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+.review-card { border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.review-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.review-form { max-width: 420px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 140px; margin-top: 12px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.bar { width: 100%; max-width: 32px; background: var(--brand); border-radius: 6px 6px 0 0; min-height: 4px; transition: height .3s; }
+.bar-label { font-size: 11px; color: var(--muted); margin-top: 6px; }

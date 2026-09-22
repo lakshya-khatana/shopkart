@@ -80,5 +80,26 @@ const addAddress = async (req, res) => {
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+const toggleWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const { productId } = req.params;
+    const idx = user.wishlist.findIndex((id) => id.toString() === productId);
+    if (idx > -1) user.wishlist.splice(idx, 1);
+    else user.wishlist.push(productId);
+    await user.save();
+    return res.json({ wishlist: user.wishlist });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 
-module.exports = { registerUser, loginUser, getMe, addAddress };
+const getWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate("wishlist");
+    return res.json(user.wishlist);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+module.exports = { registerUser, loginUser, getMe, addAddress, toggleWishlist, getWishlist };

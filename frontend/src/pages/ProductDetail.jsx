@@ -1,6 +1,6 @@
 import { getImage } from "../components/ProductCard";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -16,14 +16,14 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [msg, setMsg] = useState("");
   const [related, setRelated] = useState([]);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [reviewMsg, setReviewMsg] = useState("");
 
-  useEffect(() => {
+  const loadProduct = () => {
     setStatus("loading");
-    api
-      .get(`/products/${id}`)
-      .then(({ data }) => { setProduct(data.product || data); setStatus("ready"); })
-      .catch(() => setStatus("error"));
-  }, [id]);
+    api.get(`/products/${id}`).then(({ data }) => { setProduct(data.product || data); setStatus("ready"); }).catch(() => setStatus("error"));
+  };
+  useEffect(loadProduct, [id]);
 
   useEffect(() => {
     if (!product?.category) return;
@@ -45,6 +45,18 @@ export default function ProductDetail() {
     }
   };
 
+  const submitReview = async (e) => {
+    e.preventDefault();
+    setReviewMsg("");
+    try {
+      await api.post(`/products/${id}/reviews`, reviewForm);
+      setReviewForm({ rating: 5, comment: "" });
+      loadProduct();
+    } catch (err) {
+      setReviewMsg(err.response?.data?.message || "Could not submit review");
+    }
+  };
+
   if (status === "loading") return <main className="container"><div className="skeleton" style={{ height: 380, marginTop: 32 }} /></main>;
   if (status === "error" || !product)
     return (
@@ -60,6 +72,7 @@ export default function ProductDetail() {
   const img = getImage(product);
   const stock = product.stock === undefined ? null : Number(product.stock);
   const outOfStock = stock !== null && stock <= 0;
+  const alreadyReviewed = user && product.reviews?.some((r) => (r.user?._id || r.user) === user._id);
 
   return (
     <>
@@ -68,7 +81,7 @@ export default function ProductDetail() {
         <div className="detail-info">
           <span className="card-cat">{product.category}</span>
           <h1>{product.name}</h1>
-          {product.rating > 0 && <span className="rating">★ {Number(product.rating).toFixed(1)}</span>}
+          {product.rating > 0 && <span className="rating">★ {Number(product.rating).toFixed(1)} ({product.numReviews} reviews)</span>}
           <p className="detail-price">₹{Number(product.price).toLocaleString("en-IN")}</p>
           {product.description && <p className="detail-desc">{product.description}</p>}
           <p className="detail-stock">{outOfStock ? "Out of stock" : stock !== null ? `${stock} in stock` : "In stock"}</p>
@@ -88,13 +101,43 @@ export default function ProductDetail() {
         </div>
       </main>
 
+      <section className="container reviews-section">
+        <h2>Reviews ({product.numReviews || 0})</h2>
+
+        {product.reviews?.length > 0 ? (
+          <div className="reviews-list">
+            {product.reviews.map((r) => (
+              <div className="review-card" key={r._id}>
+                <div className="review-head">
+                  <b>{r.name}</b>
+                  <span className="rating">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                </div>
+                {r.comment && <p>{r.comment}</p>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p style={{ color: "var(--muted)" }}>No reviews yet. Be the first to review this product.</p>
+        )}
+
+        {user && user.role !== "seller" && !alreadyReviewed && (
+          <form className="card review-form" onSubmit={submitReview}>
+            <h3>Write a review</h3>
+            <select value={reviewForm.rating} onChange={(e) => setReviewForm({ ...reviewForm, rating: Number(e.target.value) })}>
+              {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} star{n > 1 ? "s" : ""}</option>)}
+            </select>
+            <textarea placeholder="Share your experience" rows={3} value={reviewForm.comment} onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })} />
+            {reviewMsg && <p className="error-text">{reviewMsg}</p>}
+            <button type="submit">Submit review</button>
+          </form>
+        )}
+      </section>
+
       {related.length > 0 && (
         <section className="container related">
           <h2>You may also like</h2>
           <div className="grid">
-            {related.map((p) => (
-              <ProductCard key={p._id} product={p} onAdd={() => handleAdd(false)} />
-            ))}
+            {related.map((p) => <ProductCard key={p._id} product={p} onAdd={(prod) => addToCart(prod._id, 1)} />)}
           </div>
         </section>
       )}

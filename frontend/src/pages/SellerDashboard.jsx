@@ -3,48 +3,55 @@ import api from "../api";
 
 const CATEGORIES = ["Electronics", "Fashion", "Home & Kitchen", "Books", "Beauty", "Sports"];
 
+function SalesChart({ orders }) {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d;
+  });
+  const totals = days.map((d) => {
+    const key = d.toDateString();
+    return orders.filter((o) => new Date(o.createdAt).toDateString() === key).reduce((s, o) => s + o.totalPrice, 0);
+  });
+  const max = Math.max(...totals, 1);
+
+  return (
+    <div className="card">
+      <h3>Sales — last 7 days</h3>
+      <div className="bar-chart">
+        {totals.map((v, i) => (
+          <div className="bar-col" key={i}>
+            <div className="bar" style={{ height: `${(v / max) * 100}%` }} title={`₹${v}`} />
+            <span className="bar-label">{days[i].toLocaleDateString("en-IN", { weekday: "short" })}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const SellerDashboard = () => {
   const [tab, setTab] = useState("products");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [form, setForm] = useState({
-    name: "", description: "", category: CATEGORIES[0], price: "", stock: "", imageUrl: "",
-  });
+  const [form, setForm] = useState({ name: "", description: "", category: CATEGORIES[0], price: "", stock: "", imageUrl: "" });
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchProducts();
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchProducts(); fetchOrders(); }, []);
 
-  const fetchProducts = async () => {
-    const { data } = await api.get("/products/seller/mine");
-    setProducts(data);
-  };
-
-  const fetchOrders = async () => {
-    const { data } = await api.get("/orders/seller");
-    setOrders(data);
-  };
-
+  const fetchProducts = async () => { const { data } = await api.get("/products/seller/mine"); setProducts(data); };
+  const fetchOrders = async () => { const { data } = await api.get("/orders/seller"); setOrders(data); };
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const resetForm = () => {
-    setForm({ name: "", description: "", category: CATEGORIES[0], price: "", stock: "", imageUrl: "" });
-    setEditingId(null);
-  };
+  const resetForm = () => { setForm({ name: "", description: "", category: CATEGORIES[0], price: "", stock: "", imageUrl: "" }); setEditingId(null); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
       const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
-      if (editingId) {
-        await api.put(`/products/${editingId}`, payload);
-      } else {
-        await api.post("/products", payload);
-      }
+      if (editingId) await api.put(`/products/${editingId}`, payload);
+      else await api.post("/products", payload);
       resetForm();
       fetchProducts();
     } catch (err) {
@@ -64,11 +71,7 @@ const SellerDashboard = () => {
     fetchProducts();
   };
 
-  const updateOrderStatus = async (id, status) => {
-    await api.put(`/orders/${id}/status`, { status });
-    fetchOrders();
-  };
-
+  const updateOrderStatus = async (id, status) => { await api.put(`/orders/${id}/status`, { status }); fetchOrders(); };
   const totalSales = orders.reduce((sum, o) => sum + o.totalPrice, 0);
 
   return (
@@ -125,6 +128,7 @@ const SellerDashboard = () => {
           <div className="card">
             <h3>Total Sales: ₹{totalSales.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</h3>
           </div>
+          <SalesChart orders={orders} />
           {orders.length === 0 && <p style={{ color: "var(--muted)" }}>No orders yet.</p>}
           {orders.map((o) => (
             <div className="card" key={o._id}>
@@ -132,12 +136,8 @@ const SellerDashboard = () => {
                 <b>Order #{o._id.slice(-6).toUpperCase()}</b>
                 <span className="status-pill">{o.status}</span>
               </div>
-              <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 10 }}>
-                Customer: {o.customer?.name} ({o.customer?.email})
-              </p>
-              {o.items.map((item, i) => (
-                <div key={i} style={{ fontSize: 14, padding: "3px 0" }}>{item.name} × {item.quantity}</div>
-              ))}
+              <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 10 }}>Customer: {o.customer?.name} ({o.customer?.email})</p>
+              {o.items.map((item, i) => (<div key={i} style={{ fontSize: 14, padding: "3px 0" }}>{item.name} × {item.quantity}</div>))}
               <div className="summary-row total"><span>Total</span><span>₹{o.totalPrice}</span></div>
               <select style={{ marginTop: 12 }} value={o.status} onChange={(e) => updateOrderStatus(o._id, e.target.value)}>
                 <option value="processing">Processing</option>

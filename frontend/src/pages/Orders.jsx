@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
 import OrderTracker from "../components/OrderTracker";
+import jsPDF from "jspdf";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -13,6 +14,26 @@ const Orders = () => {
       .then(({ data }) => { setOrders(data); setStatus("ready"); })
       .catch(() => setStatus("error"));
   }, []);
+
+  const downloadInvoice = (order) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18); doc.text("ShopKart", 14, 20);
+    doc.setFontSize(11);
+    doc.text(`Invoice — Order #${order._id.slice(-6).toUpperCase()}`, 14, 30);
+    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 14, 37);
+    let y = 50;
+    order.items.forEach((item) => {
+      doc.text(`${item.name} x${item.quantity}`, 14, y);
+      doc.text(`Rs. ${(item.price * item.quantity).toLocaleString("en-IN")}`, 160, y, { align: "right" });
+      y += 8;
+    });
+    y += 6;
+    doc.line(14, y, 196, y); y += 8;
+    doc.setFontSize(13);
+    doc.text("Total", 14, y);
+    doc.text(`Rs. ${Number(order.totalPrice).toLocaleString("en-IN")}`, 160, y, { align: "right" });
+    doc.save(`invoice-${order._id.slice(-6)}.pdf`);
+  };
 
   return (
     <div className="container" style={{ maxWidth: 720, paddingBottom: 64 }}>
@@ -64,6 +85,10 @@ const Orders = () => {
           <p style={{ fontSize: 13, marginTop: 8, fontWeight: 600, color: order.isPaid ? "#15803d" : "#b45309" }}>
             {order.isPaid ? "Paid" : "Payment pending"}
           </p>
+
+          <button className="secondary" style={{ marginTop: 10 }} onClick={() => downloadInvoice(order)}>
+            Download invoice
+          </button>
         </div>
       ))}
     </div>

@@ -73,6 +73,7 @@ export default function Navbar() {
           ) : (
             <>
               {user && <Link to="/orders" className="nav-link">Orders</Link>}
+              {user && !isSeller && <Link to="/wishlist" className="nav-link">Wishlist</Link>}
               <Link to="/cart" className="icon-btn" aria-label="Cart">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" /></svg>
                 {cartCount > 0 && <span className="badge">{cartCount}</span>}
