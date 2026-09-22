@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="footer">
@@ -8,15 +10,15 @@ export default function Footer() {
         </div>
         <div>
           <h4>Company</h4>
-          <a href="#">About</a>
-          <a href="#">Careers</a>
-          <a href="#">Contact</a>
+          <Link to="/about">About</Link>
+          <Link to="/careers">Careers</Link>
+          <Link to="/contact">Contact</Link>
         </div>
         <div>
           <h4>Help</h4>
-          <a href="#">Shipping</a>
-          <a href="#">Returns</a>
-          <a href="#">FAQs</a>
+          <Link to="/shipping">Shipping</Link>
+          <Link to="/returns">Returns</Link>
+          <Link to="/faqs">FAQs</Link>
         </div>
       </div>
       <p className="footer-bottom">© {new Date().getFullYear()} ShopKart — Built by Lakshya Khatana</p>

@@ -225,3 +225,19 @@ button.danger:hover { background: #fef2f2; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
 .bar { width: 100%; max-width: 32px; background: var(--brand); border-radius: 6px 6px 0 0; min-height: 4px; transition: height .3s; }
 .bar-label { font-size: 11px; color: var(--muted); margin-top: 6px; }
+/* Static info pages */
+.info-page { max-width: 720px; padding: 48px 24px 64px; margin: 0 auto; }
+.info-page h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
+.info-page .subtitle { color: var(--muted); margin-bottom: 32px; }
+.info-page h2 { font-size: 18px; font-weight: 700; margin: 28px 0 10px; }
+.info-page p { color: var(--ink); line-height: 1.7; margin-bottom: 12px; }
+.info-page ul { padding-left: 20px; margin-bottom: 12px; }
+.info-page li { margin-bottom: 6px; line-height: 1.6; }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.contact-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.contact-card h3 { font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+.contact-card p { margin: 0; font-weight: 700; }
+.faq-item { border-bottom: 1px solid var(--line); padding: 16px 0; }
+.faq-item h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.faq-item p { color: var(--muted); margin: 0; }
+@media (max-width: 640px) { .contact-grid { grid-template-columns: 1fr; } }

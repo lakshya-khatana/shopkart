@@ -15,6 +15,12 @@ import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Wishlist from "./pages/Wishlist";
 import SellerDashboard from "./pages/SellerDashboard";
+import About from "./pages/About";
+import Careers from "./pages/Careers";
+import Contact from "./pages/Contact";
+import Shipping from "./pages/Shipping";
+import Returns from "./pages/Returns";
+import Faqs from "./pages/Faqs";
 
 function App() {
   return (
@@ -33,6 +39,12 @@ function App() {
               <Route path="/orders" element={<PrivateRoute role="customer"><Orders /></PrivateRoute>} />
               <Route path="/wishlist" element={<PrivateRoute role="customer"><Wishlist /></PrivateRoute>} />
               <Route path="/seller" element={<PrivateRoute role="seller"><SellerDashboard /></PrivateRoute>} />
+              <Route path="/about" element={<About />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/shipping" element={<Shipping />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/faqs" element={<Faqs />} />
             </Routes>
             <Footer />
           </BrowserRouter>
