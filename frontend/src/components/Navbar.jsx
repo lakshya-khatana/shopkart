@@ -2,11 +2,13 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import api from "../api";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [q, setQ] = useState(params.get("search") || "");
@@ -73,11 +75,22 @@ export default function Navbar() {
           ) : (
             <>
               {user && <Link to="/orders" className="nav-link">Orders</Link>}
-              {user && !isSeller && <Link to="/wishlist" className="nav-link">Wishlist</Link>}
-              <Link to="/cart" className="icon-btn" aria-label="Cart">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" /></svg>
-                {cartCount > 0 && <span className="badge">{cartCount}</span>}
-              </Link>
+
+              {user && !isSeller && (
+                <div className="nav-icons">
+                  <Link to="/wishlist" className="icon-btn" aria-label="Wishlist">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+                    </svg>
+                    {wishlistCount > 0 && <span className="badge">{wishlistCount}</span>}
+                  </Link>
+
+                  <Link to="/cart" className="icon-btn" aria-label="Cart">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" /></svg>
+                    {cartCount > 0 && <span className="badge">{cartCount}</span>}
+                  </Link>
+                </div>
+              )}
             </>
           )}
 

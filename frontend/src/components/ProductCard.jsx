@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 
-export const getImage = (p) => p.imageUrl || p.image || p.images?.[0] || null;
+export const getImage = (p) => p.images?.[0] || p.imageUrl || p.image || null;
 
 export default function ProductCard({ product, onAdd }) {
   const { user } = useAuth();

@@ -18,7 +18,8 @@ const productSchema = new mongoose.Schema(
     category: { type: String, required: true, index: true },
     price: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
-    imageUrl: { type: String, default: "" }, // could be a Cloudinary URL
+    imageUrl: { type: String, default: "" }, // kept for backward compatibility with old products
+    images: { type: [String], default: [] }, // up to 4 image URLs
     reviews: [reviewSchema],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },

@@ -50,7 +50,8 @@ const getProductById = async (req, res) => {
 // @route POST /api/products
 const createProduct = async (req, res) => {
   try {
-    const { name, description, category, price, stock, imageUrl } = req.body;
+    const { name, description, category, price, stock, imageUrl, images } = req.body;
+    const cleanImages = Array.isArray(images) ? images.filter(Boolean).slice(0, 4) : [];
     const product = await Product.create({
       seller: req.user._id,
       name,
@@ -58,7 +59,8 @@ const createProduct = async (req, res) => {
       category,
       price,
       stock,
-      imageUrl,
+      imageUrl: imageUrl || cleanImages[0] || "", // first image also saved here for old code that still reads imageUrl
+      images: cleanImages,
     });
     return res.status(201).json(product);
   } catch (err) {

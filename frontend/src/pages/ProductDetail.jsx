@@ -18,10 +18,11 @@ export default function ProductDetail() {
   const [related, setRelated] = useState([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [reviewMsg, setReviewMsg] = useState("");
+  const [activeImg, setActiveImg] = useState(0);
 
   const loadProduct = () => {
     setStatus("loading");
-    api.get(`/products/${id}`).then(({ data }) => { setProduct(data.product || data); setStatus("ready"); }).catch(() => setStatus("error"));
+    api.get(`/products/${id}`).then(({ data }) => { setProduct(data.product || data); setActiveImg(0); setStatus("ready"); }).catch(() => setStatus("error"));
   };
   useEffect(loadProduct, [id]);
 
@@ -69,7 +70,9 @@ export default function ProductDetail() {
       </main>
     );
 
-  const img = getImage(product);
+  // Falls back to the single imageUrl for older products that don't have an images array yet
+  const gallery = product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [];
+  const mainImg = gallery[activeImg] || getImage(product);
   const stock = product.stock === undefined ? null : Number(product.stock);
   const outOfStock = stock !== null && stock <= 0;
   const alreadyReviewed = user && product.reviews?.some((r) => (r.user?._id || r.user) === user._id);
@@ -77,7 +80,28 @@ export default function ProductDetail() {
   return (
     <>
       <main className="container detail">
-        <div className="detail-img">{img && <img src={img} alt={product.name} />}</div>
+        <div>
+          <div className="detail-img">{mainImg && <img src={mainImg} alt={product.name} />}</div>
+          {gallery.length > 1 && (
+            <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+              {gallery.map((src, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActiveImg(i)}
+                  style={{
+                    width: 64, height: 64, borderRadius: 10, overflow: "hidden", padding: 0, cursor: "pointer",
+                    border: i === activeImg ? "2px solid var(--brand)" : "1px solid var(--line)",
+                    background: "#eef0f5",
+                  }}
+                >
+                  <img src={src} alt={`${product.name} ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="detail-info">
           <span className="card-cat">{product.category}</span>
           <h1>{product.name}</h1>

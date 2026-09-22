@@ -89,6 +89,8 @@ button, input, select { font: inherit; }
 .nav-link:hover { background: var(--brand-soft); color: var(--brand-dark); }
 .nav-user { font-size: 14px; font-weight: 600; color: var(--muted); }
 .nav-actions .btn { height: 40px; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-icons { display: flex; align-items: center; gap: 10px; }
 
 /* Card links */
 .card-img { display: block; }
@@ -136,11 +138,11 @@ textarea { height: auto; padding: 12px 14px; resize: vertical; min-height: 90px;
 input:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); background: #fff; }
 input::placeholder, textarea::placeholder { color: #9aa0ac; }
 
-button[type="submit"], .card button:not(.secondary):not(.danger) {
+button[type="submit"], .card button:not(.secondary):not(.danger):not(.wish-btn) {
   height: 44px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--brand); color: #fff;
   font-weight: 700; cursor: pointer; transition: background .15s, transform .1s, opacity .15s;
 }
-button[type="submit"]:hover, .card button:not(.secondary):not(.danger):hover { background: var(--brand-dark); }
+button[type="submit"]:hover, .card button:not(.secondary):not(.danger):not(.wish-btn):hover { background: var(--brand-dark); }
 button[type="submit"]:disabled { opacity: .6; cursor: not-allowed; }
 button:active { transform: scale(.98); }
 
@@ -186,7 +188,7 @@ button.danger:hover { background: #fef2f2; }
 .qty-control button { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--bg); font-weight: 700; cursor: pointer; }
 .qty-control button:hover { background: var(--brand-soft); }
 .qty-control span { min-width: 18px; text-align: center; font-weight: 700; }
-.btn-block, form > .card button[type="submit"], .card > button:not(.secondary):not(.danger) { width: 100%; }
+.btn-block, form > .card button[type="submit"], .card > button:not(.secondary):not(.danger):not(.wish-btn) { width: 100%; }
 
 /* Demo banner */
 .demo-banner { display: flex; gap: 10px; align-items: flex-start; background: var(--brand-soft); border: 1px solid #ffd9c2; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--brand-dark); line-height: 1.5; }
@@ -241,3 +243,4 @@ button.danger:hover { background: #fef2f2; }
 .faq-item h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
 .faq-item p { color: var(--muted); margin: 0; }
 @media (max-width: 640px) { .contact-grid { grid-template-columns: 1fr; } }
+.locate-btn { margin-bottom: 12px; width: 100%; }

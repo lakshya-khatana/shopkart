@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api";
 
 const CATEGORIES = ["Electronics", "Fashion", "Home & Kitchen", "Books", "Beauty", "Sports"];
+const emptyForm = { name: "", description: "", category: CATEGORIES[0], price: "", stock: "", images: [""] };
 
 function SalesChart({ orders }) {
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -34,7 +35,7 @@ const SellerDashboard = () => {
   const [tab, setTab] = useState("products");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [form, setForm] = useState({ name: "", description: "", category: CATEGORIES[0], price: "", stock: "", imageUrl: "" });
+  const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
 
@@ -43,13 +44,30 @@ const SellerDashboard = () => {
   const fetchProducts = async () => { const { data } = await api.get("/products/seller/mine"); setProducts(data); };
   const fetchOrders = async () => { const { data } = await api.get("/orders/seller"); setOrders(data); };
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const resetForm = () => { setForm({ name: "", description: "", category: CATEGORIES[0], price: "", stock: "", imageUrl: "" }); setEditingId(null); };
+  const resetForm = () => { setForm(emptyForm); setEditingId(null); };
+
+  const handleImageChange = (index, value) => {
+    const next = [...form.images];
+    next[index] = value;
+    setForm({ ...form, images: next });
+  };
+
+  const addImageField = () => {
+    if (form.images.length >= 4) return;
+    setForm({ ...form, images: [...form.images, ""] });
+  };
+
+  const removeImageField = (index) => {
+    const next = form.images.filter((_, i) => i !== index);
+    setForm({ ...form, images: next.length ? next : [""] });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
+      const cleanImages = form.images.map((u) => u.trim()).filter(Boolean).slice(0, 4);
+      const payload = { ...form, price: Number(form.price), stock: Number(form.stock), images: cleanImages };
       if (editingId) await api.put(`/products/${editingId}`, payload);
       else await api.post("/products", payload);
       resetForm();
@@ -60,7 +78,8 @@ const SellerDashboard = () => {
   };
 
   const handleEdit = (p) => {
-    setForm({ name: p.name, description: p.description, category: p.category, price: p.price, stock: p.stock, imageUrl: p.imageUrl });
+    const existingImages = p.images?.length ? p.images : p.imageUrl ? [p.imageUrl] : [""];
+    setForm({ name: p.name, description: p.description, category: p.category, price: p.price, stock: p.stock, images: existingImages });
     setEditingId(p._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -95,7 +114,26 @@ const SellerDashboard = () => {
               </select>
               <input name="price" type="number" placeholder="Price (₹)" value={form.price} onChange={handleChange} required />
               <input name="stock" type="number" placeholder="Stock quantity" value={form.stock} onChange={handleChange} required />
-              <input name="imageUrl" placeholder="Image URL (optional)" value={form.imageUrl} onChange={handleChange} />
+
+              <label style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)", marginTop: 4 }}>
+                Product images (up to 4)
+              </label>
+              {form.images.map((url, i) => (
+                <div key={i} style={{ display: "flex", gap: 8 }}>
+                  <input
+                    placeholder={`Image URL ${i + 1}${i === 0 ? " (main)" : ""}`}
+                    value={url}
+                    onChange={(e) => handleImageChange(i, e.target.value)}
+                  />
+                  {form.images.length > 1 && (
+                    <button type="button" className="secondary" style={{ flexShrink: 0 }} onClick={() => removeImageField(i)}>✕</button>
+                  )}
+                </div>
+              ))}
+              {form.images.length < 4 && (
+                <button type="button" className="secondary" onClick={addImageField}>+ Add another image</button>
+              )}
+
               {error && <p className="error-text">{error}</p>}
               <div style={{ display: "flex", gap: 10 }}>
                 <button type="submit">{editingId ? "Update Product" : "Add Product"}</button>
@@ -111,7 +149,7 @@ const SellerDashboard = () => {
               <div key={p._id} className="product-row">
                 <div>
                   <div className="name">{p.name}</div>
-                  <div className="meta">₹{Number(p.price).toLocaleString("en-IN")} · Stock: {p.stock}</div>
+                  <div className="meta">₹{Number(p.price).toLocaleString("en-IN")} · Stock: {p.stock} · {p.images?.length || (p.imageUrl ? 1 : 0)} image(s)</div>
                 </div>
                 <div className="actions">
                   <button className="secondary" onClick={() => handleEdit(p)}>Edit</button>
