@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
+import OrderTracker from "../components/OrderTracker";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -53,6 +54,9 @@ const Orders = () => {
               {item.name} × {item.quantity} — ₹{(item.price * item.quantity).toLocaleString("en-IN")}
             </div>
           ))}
+
+          <OrderTracker status={order.status} />
+
           <div className="summary-row total">
             <span>Total</span>
             <span>₹{Number(order.totalPrice).toLocaleString("en-IN")}</span>
